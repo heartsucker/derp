@@ -7,7 +7,7 @@ homepage = "https://github.com/heartsucker/derp"
 repository = "https://github.com/heartsucker/derp"
 documentation = "https://docs.rs/derp"
 readme = "README.md"
-license = "MIT/Apache-2.0"
+license = "ISC"
 keywords = [ "der", "parser" ]
 
 [[bin]]
