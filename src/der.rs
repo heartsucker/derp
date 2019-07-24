@@ -18,7 +18,7 @@
 
 #[cfg(feature = "cli")]
 use std::fmt::{self, Display, Formatter};
-use untrusted::{Reader, Input};
+use untrusted::{Input, Reader};
 
 use {Error, Result};
 
@@ -82,21 +82,25 @@ impl Tag {
             x if x == Tag::Sequence as u8 => Ok(Tag::Sequence),
             x if x == Tag::UtcTime as u8 => Ok(Tag::UtcTime),
             x if x == Tag::GeneralizedTime as u8 => Ok(Tag::GeneralizedTime),
-            x if x == Tag::ContextSpecificConstructed0 as u8 => Ok(Tag::ContextSpecificConstructed0),
-            x if x == Tag::ContextSpecificConstructed1 as u8 => Ok(Tag::ContextSpecificConstructed1),
-            x if x == Tag::ContextSpecificConstructed2 as u8 => Ok(Tag::ContextSpecificConstructed2),
-            x if x == Tag::ContextSpecificConstructed3 as u8 => Ok(Tag::ContextSpecificConstructed3),
-            _ => Err(Error::UnknownTag)
+            x if x == Tag::ContextSpecificConstructed0 as u8 => {
+                Ok(Tag::ContextSpecificConstructed0)
+            }
+            x if x == Tag::ContextSpecificConstructed1 as u8 => {
+                Ok(Tag::ContextSpecificConstructed1)
+            }
+            x if x == Tag::ContextSpecificConstructed2 as u8 => {
+                Ok(Tag::ContextSpecificConstructed2)
+            }
+            x if x == Tag::ContextSpecificConstructed3 as u8 => {
+                Ok(Tag::ContextSpecificConstructed3)
+            }
+            _ => Err(Error::UnknownTag),
         }
     }
 }
 
-
 /// Read a tag and return it's value. Errors when the expect and actual tag do not match.
-pub fn expect_tag_and_get_value<'a>(
-    input: &mut Reader<'a>,
-    tag: Tag,
-) -> Result<Input<'a>> {
+pub fn expect_tag_and_get_value<'a>(input: &mut Reader<'a>, tag: Tag) -> Result<Input<'a>> {
     let (actual_tag, inner) = read_tag_and_get_value(input)?;
     if tag as u8 != actual_tag {
         return Err(Error::WrongTag);
@@ -105,9 +109,7 @@ pub fn expect_tag_and_get_value<'a>(
 }
 
 /// Read the next tag, and return it and its value.
-pub fn read_tag_and_get_value<'a>(
-    input: &mut Reader<'a>,
-) -> Result<(u8, Input<'a>)> {
+pub fn read_tag_and_get_value<'a>(input: &mut Reader<'a>) -> Result<(u8, Input<'a>)> {
     let tag = input.read_byte()?;
     if (tag & 0x1F) == 0x1F {
         return Err(Error::HighTagNumberForm);
@@ -142,8 +144,7 @@ pub fn read_tag_and_get_value<'a>(
 }
 
 pub fn read_null<'a>(input: &mut Reader<'a>) -> Result<()> {
-    expect_tag_and_get_value(input, Tag::Null)
-        .map(|_| ())
+    expect_tag_and_get_value(input, Tag::Null).map(|_| ())
 }
 
 /// Read a `BIT STRING` with leading byte `0x00` signifying no unused bits.
@@ -164,9 +165,7 @@ pub fn read_null<'a>(input: &mut Reader<'a>) -> Result<()> {
 ///     assert_eq!(bits, Input::from(&[0x01, 0x02, 0x03]));
 /// }
 /// ```
-pub fn bit_string_with_no_unused_bits<'a>(
-    input: &mut Reader<'a>,
-) -> Result<Input<'a>> {
+pub fn bit_string_with_no_unused_bits<'a>(input: &mut Reader<'a>) -> Result<Input<'a>> {
     nested(input, Tag::BitString, |value| {
         let unused_bits_at_end = value.read_byte()?;
         if unused_bits_at_end != 0 {
@@ -222,10 +221,7 @@ where
 }
 
 /// Return a non-negative integer.
-pub fn nonnegative_integer<'a>(
-    input: &mut Reader<'a>,
-    min_value: u8,
-) -> Result<Input<'a>> {
+pub fn nonnegative_integer<'a>(input: &mut Reader<'a>, min_value: u8) -> Result<Input<'a>> {
     // Verify that |input|, which has had any leading zero stripped off, is the
     // encoding of a value of at least |min_value|.
     fn check_minimum(input: Input, min_value: u8) -> Result<()> {
@@ -344,38 +340,33 @@ mod tests {
 
     static ZERO_INTEGER: &'static [u8] = &[0x02, 0x01, 0x00];
 
-    static GOOD_POSITIVE_INTEGERS: &'static [(&'static [u8], u8)] =
-        &[
-            (&[0x02, 0x01, 0x01], 0x01),
-            (&[0x02, 0x01, 0x02], 0x02),
-            (&[0x02, 0x01, 0x7e], 0x7e),
-            (&[0x02, 0x01, 0x7f], 0x7f),
-
-            // Values that need to have an 0x00 prefix to disambiguate them from
-            // them from negative values.
-            (&[0x02, 0x02, 0x00, 0x80], 0x80),
-            (&[0x02, 0x02, 0x00, 0x81], 0x81),
-            (&[0x02, 0x02, 0x00, 0xfe], 0xfe),
-            (&[0x02, 0x02, 0x00, 0xff], 0xff),
-        ];
+    static GOOD_POSITIVE_INTEGERS: &'static [(&'static [u8], u8)] = &[
+        (&[0x02, 0x01, 0x01], 0x01),
+        (&[0x02, 0x01, 0x02], 0x02),
+        (&[0x02, 0x01, 0x7e], 0x7e),
+        (&[0x02, 0x01, 0x7f], 0x7f),
+        // Values that need to have an 0x00 prefix to disambiguate them from
+        // them from negative values.
+        (&[0x02, 0x02, 0x00, 0x80], 0x80),
+        (&[0x02, 0x02, 0x00, 0x81], 0x81),
+        (&[0x02, 0x02, 0x00, 0xfe], 0xfe),
+        (&[0x02, 0x02, 0x00, 0xff], 0xff),
+    ];
 
     static BAD_NONNEGATIVE_INTEGERS: &'static [&'static [u8]] = &[
-        &[], // At end of input
-        &[0x02], // Tag only
+        &[],           // At end of input
+        &[0x02],       // Tag only
         &[0x02, 0x00], // Empty value
-
         // Length mismatch
         &[0x02, 0x00, 0x01],
         &[0x02, 0x01],
         &[0x02, 0x01, 0x00, 0x01],
         &[0x02, 0x01, 0x01, 0x00], // Would be valid if last byte is ignored.
         &[0x02, 0x02, 0x01],
-
         // Negative values
         &[0x02, 0x01, 0x80],
         &[0x02, 0x01, 0xfe],
         &[0x02, 0x01, 0xff],
-
         // Values that have an unnecessary leading 0x00
         &[0x02, 0x02, 0x00, 0x00],
         &[0x02, 0x02, 0x00, 0x01],
@@ -413,10 +404,7 @@ mod tests {
         for &(ref test_in, test_out) in GOOD_POSITIVE_INTEGERS.iter() {
             with_good_i(test_in, |input| {
                 let test_out = [test_out];
-                assert_eq!(
-                    positive_integer(input)?,
-                    Input::from(&test_out[..])
-                );
+                assert_eq!(positive_integer(input)?, Input::from(&test_out[..]));
                 Ok(())
             });
         }
