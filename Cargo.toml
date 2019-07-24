@@ -1,6 +1,6 @@
 [package]
 name = "derp"
-version = "0.0.11"
+version = "0.0.12"
 authors = ["heartsucker <heartsucker@autistici.org>"]
 description = "DER Parser (and Writer)"
 homepage = "https://github.com/heartsucker/derp"
@@ -23,4 +23,4 @@ cli = [ "clap", "data-encoding", "pem" ]
 clap = { version = "2.23", optional = true }
 data-encoding = { version = "2.0.0-rc.1", optional = true }
 pem = { version = "0.6", optional = true }
-untrusted = "0.6"
+untrusted = "0.7"
