@@ -1,5 +1,6 @@
 [package]
 name = "derp"
+edition = "2018"
 version = "0.0.13"
 authors = ["heartsucker <heartsucker@autistici.org>"]
 description = "DER Parser (and Writer)"
@@ -10,17 +11,5 @@ readme = "README.md"
 license = "ISC"
 keywords = [ "der", "parser" ]
 
-[[bin]]
-name = "derp"
-path = "./src/bin/derp.rs"
-doc = false
-required-features = [ "cli" ]
-
-[features]
-cli = [ "clap", "data-encoding", "pem" ]
-
 [dependencies]
-clap = { version = "2.23", optional = true }
-data-encoding = { version = "2.0.0-rc.1", optional = true }
-pem = { version = "0.6", optional = true }
 untrusted = "0.7"
