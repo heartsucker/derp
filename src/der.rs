@@ -174,7 +174,7 @@ pub fn read_null<'a>(input: &mut Reader<'a>) -> Result<()> {
 ///     let bits = input.read_all(derp::Error::Read, |input| {
 ///         derp::bit_string_with_no_unused_bits(input)
 ///     }).unwrap();
-///     assert_eq!(bits, Input::from(&[0x01, 0x02, 0x03]));
+///     assert_eq!(bits.as_slice_less_safe(), &[0x01, 0x02, 0x03]);
 /// }
 /// ```
 pub fn bit_string_with_no_unused_bits<'a>(input: &mut Reader<'a>) -> Result<Input<'a>> {
@@ -217,9 +217,9 @@ pub fn bit_string_with_no_unused_bits<'a>(input: &mut Reader<'a>) -> Result<Inpu
 ///         })
 ///     }).unwrap();
 ///
-///     assert_eq!(x, Input::from(&[0x0a, 0x0b, 0x0c, 0x0d]));
-///     assert_eq!(y, Input::from(&[0x1a, 0x1b, 0x1c, 0x1d]));
-///     assert_eq!(z, Input::from(&[0x01, 0x02, 0x03, 0x04]));
+///     assert_eq!(x.as_slice_less_safe(), &[0x0a, 0x0b, 0x0c, 0x0d]);
+///     assert_eq!(y.as_slice_less_safe(), &[0x1a, 0x1b, 0x1c, 0x1d]);
+///     assert_eq!(z.as_slice_less_safe(), &[0x01, 0x02, 0x03, 0x04]);
 /// }
 /// ```
 // TODO: investigate taking decoder as a reference to reduce generated code
@@ -416,7 +416,7 @@ mod tests {
         for &(test_in, test_out) in GOOD_POSITIVE_INTEGERS.iter() {
             with_good_i(test_in, |input| {
                 let test_out = [test_out];
-                assert_eq!(positive_integer(input)?, Input::from(&test_out[..]));
+                assert_eq!(positive_integer(input)?.as_slice_less_safe(), test_out);
                 Ok(())
             });
         }
