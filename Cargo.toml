@@ -12,4 +12,4 @@ license = "ISC"
 keywords = [ "der", "parser" ]
 
 [dependencies]
-untrusted = "0.7"
+untrusted = "0.9"

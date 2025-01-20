@@ -1,7 +1,7 @@
 use std::io::Write;
 
-use crate::Result;
 use crate::der::{self, Tag};
+use crate::Result;
 
 /// Helper for writing DER that automattically encoes tags and content lengths.
 pub struct Der<'a, W: Write + 'a> {
@@ -11,7 +11,7 @@ pub struct Der<'a, W: Write + 'a> {
 impl<'a, W: Write> Der<'a, W> {
     /// Create a new `Der` structure that writes values to the given writer.
     pub fn new(writer: &'a mut W) -> Self {
-        Der { writer: writer }
+        Der { writer }
     }
 
     fn write_len(&mut self, len: usize) -> Result<()> {
@@ -130,8 +130,8 @@ impl<'a, W: Write> Der<'a, W> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use untrusted::Input;
     use crate::Error;
+    use untrusted::Input;
 
     static RSA_2048_PKCS1: &'static [u8] = include_bytes!("../tests/rsa-2048.pkcs1.der");
 
